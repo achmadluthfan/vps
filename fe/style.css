@@ -1,0 +1,60 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Nunito Sans", sans-serif;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: relative;
+    padding-bottom: 150px;
+}
+
+.container img {
+    width: 500px;
+}
+
+body {
+    min-height: 100vh;
+}
+
+#arrow {
+    width: 40px;
+    position: absolute;
+    right: 30px;
+    animation-name: example;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-timing-function: ease-in-out;
+}
+
+/* responsive section */
+@media only screen and (max-width: 768px) {
+
+    .container img {
+        width: 90%;
+    }
+
+    #arrow {
+        width: 40px;
+        position: absolute;
+        bottom: 20px;
+        right: 50%;
+    }
+}
+
+/* arrow animation */
+@keyframes example {
+    from {
+        transform: translateX(-10px);
+    }
+    to {
+        transform: translateX(0px);
+    }
+  }
