@@ -1,4 +1,5 @@
 from proxmoxer import ProxmoxAPI
+from app import db
 import time
 import json
 
@@ -31,4 +32,7 @@ def interface_lxc(vmid):
         print(f"An error occurred: {e}")
 
 def destroy_lxc():
+    pass
+
+def determine_vmid():
     pass
