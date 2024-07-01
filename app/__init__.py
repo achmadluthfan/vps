@@ -5,6 +5,5 @@ app = Flask(__name__)
 app.config.from_object(Config)
 cur = Config.conn.cursor()
 
-from .proxmox import proxmox_bp
-
+from app.lxc.routes import proxmox_bp
 app.register_blueprint(proxmox_bp, url_prefix='/proxmox')
