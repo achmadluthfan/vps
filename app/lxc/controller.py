@@ -4,21 +4,48 @@ import os
 from app.lxc import utility
 from .database import LXCDB
 
-def data_lxc():
+def data():
     try:
+      result = []
+      
       success, dorm = LXCDB.get_all_lxc()
-      if success == True:
-        data = dorm
-        return data
-      else:
+      if not success:
         message = dorm
         print(message)
         return None
+      
+      data = dorm
+      if data != []:
+        for d in data:
+          vmid = d['vmid']
+
+          ipv4 = None
+          success_interfaces, interfaces_info = utility.interfaces(vmid)
+          if not success_interfaces:
+            print(f"[!] Interface info error: {e}")
+          if interfaces_info != None:
+            if 'inet' in interfaces_info[1]:
+              ipv4 = interfaces_info[1]["inet"]
+          
+          success_status, status_info = utility.status(vmid)
+          if not success_status:
+            print(f"[!] Status info error: {e}")      
+
+          result.append({
+            "hostname": d['hostname'],
+            "vmid" : vmid,
+            "user" : "root",
+            "password" : d['password'],
+            'ipv4' : ipv4,
+            'status' : status_info['status']
+          })
+      return result
+
     except Exception as e:
-      print(e)
+      print(f'Controller data error: {e}')
       return None
 
-def create_lxc(lxc_type: str, ostemp: str, hostname: str, password: str):
+def create(lxc_type: str, ostemp: str, hostname: str, password: str):
     try:
         path = os.path.dirname(__file__)
         spec_path = os.path.join(path, 'specification.json')
@@ -36,7 +63,8 @@ def create_lxc(lxc_type: str, ostemp: str, hostname: str, password: str):
         container_params['hostname'] = hostname
         container_params['password'] = password
 
-        success_create, dorm_create = utility.create_lxc(container_params)
+        message = "Successfully create lxc"
+        success_create, dorm_create = utility.create(container_params)
         if not success_create:
             message = dorm_create
             print(message)
@@ -44,48 +72,77 @@ def create_lxc(lxc_type: str, ostemp: str, hostname: str, password: str):
 
         time.sleep(5)
         
-        success_start, dorm_start = utility.start_lxc(container_params['vmid'])
-        if success_start:
-            ip_addr = None
-            time.sleep(20)
-            success_int, dorm_int = utility.interfaces_lxc(container_params['vmid'])
-            if success_int:
-                interface_lxc = dorm_int
-                print(interface_lxc)
-                if interface_lxc != None:
-                    ip_addr = interface_lxc[1]["inet"]
-
-        else:
+        success_start, dorm_start = utility.start(container_params['vmid'])
+        if not success_start:
             message = dorm_start
-            print(message)
 
         lxc = LXCDB(
             vmid=container_params['vmid'],
             hostname=container_params['hostname'],
             password=container_params['password'],
-            ip_addr=ip_addr,
             ostemplate=container_params['ostemplate'],
             lxc_type=lxc_type
         )
         success_add, dorm_add = lxc.add_lxc()
         if success_add:
-          return lxc.to_dict()
-        else:
-          message = dorm_add
-          print(message)
-          return None
+          return {
+            'message' : message
+        }
+        message = dorm_add
+        print(message)
+        return None
     except Exception as e:
         message = f"[!] Controller error create LXC: {e}"
         print(message)
         return None
-
-def shutdown_lxc(vmid: int):
-    success, dorm = utility.shutdown_lxc(vmid)
-    if success == False:
-        message = dorm
+    
+def start(vmid: int):
+    try:
+        success, dorm = utility.start(vmid)
+        if success == False:
+            message = dorm
+            print(message)
+            return None
+        return {
+            'message' : 'Start was successful.'
+        }
+    except Exception as e:
+        message = f"[!] Controller error start LXC: {e}"
         print(message)
         return None
-    return {
-        'message' : 'Shutdown was successful.'
-    }
+
+def shutdown(vmid: int):
+    try:
+        success, dorm = utility.shutdown(vmid)
+        if success == False:
+            message = dorm
+            print(message)
+            return None
+        return {
+            'message' : 'Shutdown was successful.'
+        }
+    except Exception as e:
+        message = f"[!] Controller error shutdown LXC: {e}"
+        print(message)
+        return None
+
+def destroy(vmid: int):
+    try:
+        success_destroy, dorm_destroy = utility.destroy(vmid)
+        if not success_destroy:
+            message = dorm_destroy
+            print(message)
+            return None
+        success_delete, dorm_delete = LXCDB.delete_lxc(vmid)
+        if not success_delete:
+            message = dorm_delete
+            print(message)
+            return None
+        return {
+            'message' : 'Destroy was successful.'
+        }
+    except Exception as e:
+        message = f"[!] Controller error destroy LXC: {e}"
+        print(message)
+        return None
     

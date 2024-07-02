@@ -1,5 +1,6 @@
 import os
 import psycopg2
+from psycopg2 import sql
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,4 +17,3 @@ class Config(object):
     print("[*] Database connected")
   except (Exception, psycopg2.DatabaseError) as e:
     print(f"[!] Database Error : {e}")
-  

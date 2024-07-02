@@ -8,7 +8,7 @@ ostemplate = {
     "ubuntu-22.04-standard" : "local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
 }
 
-def create_lxc(container_params: dict):
+def create(container_params: dict):
     try:
         proxmox.nodes(node).lxc.create(**container_params)
         # print(f"[*] LXC container with VM ID {container_params['vmid']} has been created successfully.")
@@ -17,7 +17,7 @@ def create_lxc(container_params: dict):
         message = f"[!] Util create lxc error: {e}"
         return (False, message)
 
-def start_lxc(vmid: int):
+def start(vmid: int):
     try:
         proxmox.nodes(node).lxc(vmid).status.start.post()
         # print(f"[*] LXC container with VM ID {vmid} has been started.")
@@ -26,7 +26,7 @@ def start_lxc(vmid: int):
         message = f"[!] Util start lxc error: {e}"
         return (False, message)
 
-def interfaces_lxc(vmid):
+def interfaces(vmid):
     try:
         interfaces_info = proxmox.nodes(node).lxc(vmid).interfaces.get()
         return (True, interfaces_info)
@@ -34,7 +34,15 @@ def interfaces_lxc(vmid):
         message = f"[!] Util interfaces lxc error: {e}"
         return (False, message)
 
-def shutdown_lxc(vmid):
+def status(vmid):
+    try:
+        status_info = proxmox.nodes(node).lxc(vmid).status.current.get()
+        return (True, status_info)
+    except Exception as e:
+        message = f"[!] Util status lxc error: {e}"
+        return (False, message)
+    
+def shutdown(vmid):
     try:
         proxmox.nodes(node).lxc(vmid).status.shutdown.post()
         return (True, None)
@@ -42,8 +50,13 @@ def shutdown_lxc(vmid):
         message = f"[!] Util shutdown lxc error: {e}"
         return (False, message)
 
-def destroy_lxc():
-    pass
+def destroy(vmid):
+    try:
+        proxmox.nodes(node).lxc(vmid).delete()
+        return (True, None)
+    except Exception as e:
+        message = f"[!] Util destroy lxc error: {e}"
+        return (False, message)
 
 def generate_vmid() -> int:
     vmid = None
