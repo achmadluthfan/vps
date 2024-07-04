@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, send_file
 from app import response
 from app.lxc import controller
 
@@ -63,5 +63,26 @@ def destroy(vmid):
         if result == None:
             return response.failed(400, "Destroy failed.")
         return response.success(result)
+    except Exception:
+        return response.failed(500, "Internal server error")
+
+@proxmox_bp.route('/ssh/enabled/<vmid>', methods=['POST'])
+def enable_ssh_password(vmid):
+    try:
+        result = controller.enable_ssh_password(vmid=vmid)
+        if result == None:
+            return response.failed(400, "Download key pem failed.")
+        return response.success(result)
+    except Exception:
+        return response.failed(500, "Internal server error")
+
+@proxmox_bp.route('/download/key/<vmid>', methods=['POST'])
+def download_key(vmid):
+    try:
+        result = controller.download_key(vmid=vmid)
+        if result == None:
+            return response.failed(400, "Download key pem failed.")
+        private_key, key_name = result
+        return send_file(private_key, as_attachment=True, download_name=f"{key_name}_private_key.pem", mimetype="application/x-pem-file")
     except Exception:
         return response.failed(500, "Internal server error")

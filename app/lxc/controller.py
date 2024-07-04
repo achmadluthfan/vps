@@ -3,59 +3,60 @@ import time
 import os
 from app.lxc import utility
 from .database import LXCDB
+import io
 
 def data():
     try:
-      result = []
-      
-      success, dorm = LXCDB.get_all_lxc()
-      if not success:
-        message = dorm
-        print(message)
-        return None
-      
-      data = dorm
-      if data != []:
-        for d in data:
-          vmid = d['vmid']
+        result = []
+        
+        success, dorm = LXCDB.get_all_lxc()
+        if not success:
+            message = dorm
+            print(message)
+            return None
+        
+        data = dorm
+        if data != []:
+            for d in data:
+                vmid = d['vmid']
 
-          ipv4 = None
-          success_interfaces, interfaces_info = utility.interfaces(vmid)
-          if not success_interfaces:
-            print(f"[!] Interface info error: {e}")
-          if interfaces_info != None:
-            if 'inet' in interfaces_info[1]:
-              ipv4 = interfaces_info[1]["inet"]
-          
-          success_status, status_info = utility.status(vmid)
-          if not success_status:
-            print(f"[!] Status info error: {e}")      
+            ipv4 = None
+            success_interfaces, interfaces_info = utility.interfaces(vmid)
+            if not success_interfaces:
+                print(f"[!] Interface info error: {e}")
+            if interfaces_info != None:
+                if 'inet' in interfaces_info[1]:
+                    ipv4 = interfaces_info[1]["inet"]
 
-          result.append({
+            success_status, status_info = utility.status(vmid)
+            if not success_status:
+                print(f"[!] Status info error: {e}")      
+
+            result.append({
             "hostname": d['hostname'],
             "vmid" : vmid,
             "user" : "root",
             "password" : d['password'],
             'ipv4' : ipv4,
             'status' : status_info['status']
-          })
-      return result
+            })
+        return result
 
     except Exception as e:
-      print(f'Controller data error: {e}')
-      return None
+        print(f'Controller data error: {e}')
+        return None
 
 def create(lxc_type: str, ostemp: str, hostname: str, password: str):
     try:
         path = os.path.dirname(__file__)
         spec_path = os.path.join(path, 'specification.json')
         with open(spec_path, 'r') as spec:
-          specification = json.load(spec)
+            specification = json.load(spec)
         container_params = specification.get(lxc_type)
 
         ostmp_path = os.path.join(path, 'ostemplate.json')
         with open(ostmp_path, 'r') as ot:
-          ot_json = json.load(ot)
+            ot_json = json.load(ot)
         ostemplate = ot_json.get(ostemp)
         
         container_params['vmid'] = utility.generate_vmid()
@@ -83,12 +84,26 @@ def create(lxc_type: str, ostemp: str, hostname: str, password: str):
             ostemplate=container_params['ostemplate'],
             lxc_type=lxc_type
         )
-        success_add, dorm_add = lxc.add_lxc()
+        success_add, dorm_add = lxc.insert_lxc()
         if success_add:
-          return {
+            return {
             'message' : message
         }
         message = dorm_add
+
+        success_key, dorm_key = utility.generate_ssh_key()
+        if success_key:
+            private_key, public_key = dorm_key
+            keyname = f"{container_params['vmid']}_{hostname}"
+            success_key_db, dorm_key_db = LXCDB.insert_ssh_key(key_name=keyname, private_key=private_key, public_key=public_key)
+            if success_key_db:
+                return {
+            'message' : message
+            }
+            message = dorm_key_db
+        message = dorm_key
+        
+
         print(message)
         return None
     except Exception as e:
@@ -145,4 +160,34 @@ def destroy(vmid: int):
         message = f"[!] Controller error destroy LXC: {e}"
         print(message)
         return None
-    
+
+def download_key(vmid: int):
+    try:
+        success, dorm = LXCDB.get_ssh_key(vmid=vmid)
+        if not success:
+            message = dorm
+            print(message)
+            return None
+        private_key, key_name = dorm
+        key_io = io.BytesIO(private_key)
+        key_io.seek(0)
+        return (key_io, key_name)
+    except Exception as e:
+        message = f"[!] Controller error shutdown LXC: {e}"
+        print(message)
+        return None
+
+def enable_ssh_password(vmid: int):
+    try:
+        success, dorm = utility.enable_ssh_password(vmid)
+        if not success:
+            message = dorm
+            print(message)
+            return None
+        return {
+            "message" : "You can access using password in SSH now"
+        }
+    except Exception as e:
+        message = f"[!] Enable SSH password error: {e}"
+        print(message)
+        return None
