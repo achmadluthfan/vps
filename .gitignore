@@ -1,7 +1,21 @@
-# Ignore all __pycache__ directories and their contents
-**/__pycache__/
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
 
-# Ignore Python bytecode files
-*.pyc
-*.pyo
-*.pyd
+# Environment
+venv/
+.env
+
+# Docker
+*.log
+Dockerfile
+.dockerignore
+
+# IDEs and editors
+.vscode/
+
+# Other
+dist/
+build/

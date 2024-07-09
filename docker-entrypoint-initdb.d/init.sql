@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS lxc (
 CREATE TABLE IF NOT EXISTS ssh_keys (
     vmid INTEGER PRIMARY KEY,
     key_name VARCHAR(255) NOT NULL UNIQUE,
-    private_key BYTEA,
-    public_key BYTEA,
+    private_key TEXT,
+    public_key TEXT,
     CONSTRAINT fk_vmid
         FOREIGN KEY(vmid) 
         REFERENCES lxc(vmid)
