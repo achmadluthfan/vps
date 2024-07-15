@@ -2,13 +2,14 @@ from app.nginx import utility
 
 def create_nginx_conf(container_ip: str, site_name: str):
   try:
-    success_sd = utility.create_sub_domain(site_name=site_name)
+    success_sd, message_sd = utility.create_sub_domain(site_name=site_name)
     if not success_sd:
-      return False
-    success_nc = utility.create_nginx_config(site_name=site_name, container_ip=container_ip)
+      return (False, message_sd)
+    success_nc, message_nc = utility.create_nginx_config(site_name=site_name, container_ip=container_ip)
     if not success_nc:
-      return False
-    return True
+      return (False, message_nc)
+    return (True, None)
   except Exception as e:
-    print(f"[!] Error controller create nginx conf: {e}")
-    return False
+    message = f"[!] Error controller create nginx conf: {e}"
+    print(message)
+    return (False, message)

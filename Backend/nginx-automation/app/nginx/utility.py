@@ -27,10 +27,11 @@ def create_nginx_config(site_name: str, container_ip: str):
     os.symlink(site_config_path, NGINX_SITES_ENABLED)
     
     subprocess.run(['sudo', 'systemctl', 'reload', 'nginx'], check=True)
-    return True
+    return (True, None)
   except Exception as e:
-    print(f"[!] Error utility create nginx config: {e}")
-    return False
+    message = f"[!] Error utility create nginx config: {e}"
+    print(message)
+    return (False, message)
 
 
 auth_email = os.getenv('API_EMAIL')
