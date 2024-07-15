@@ -26,16 +26,16 @@ jobs:
     - name: Build and push LXC manager image
       uses: docker/build-push-action@v4
       with:
-        context: ./lxc_manager
-        file: ./lxc_manager/Dockerfile
+        context: ./Backend
+        file: ./Backend/lxc_manager/Dockerfile
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/my-python-app:latest
     
     - name: Build and push Nginx automation image
       uses: docker/build-push-action@v4
       with:
-        context: ./nginx-automation
-        file: ./nginx-automation/Dockerfile
+        context: ./Backend
+        file: ./Backend/nginx-automation/Dockerfile
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/my-python-app:latest
 
