@@ -7,6 +7,7 @@ COPY . /app
 
 # Display Python version and contents of requirements.txt for debugging
 RUN python --version
+RUN ls -la /app
 RUN cat ./requirements.txt
 
 # Install any needed packages specified in requirements.txt
