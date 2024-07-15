@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+
+# Environment
+venv/
+.env
+
+# Docker
+*.log
+.dockerignore
+
+# IDEs and editors
+.vscode/
+
+# Other
+dist/
+build/
