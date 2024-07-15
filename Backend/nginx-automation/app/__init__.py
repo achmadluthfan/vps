@@ -16,3 +16,5 @@ CORS(app, resources={
         "expose_headers": ["Authorization", "Content-Length"]
     }
 })
+
+from app.nginx import route

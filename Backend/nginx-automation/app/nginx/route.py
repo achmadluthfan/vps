@@ -1,6 +1,6 @@
 from app import app, limiter, response
 from flask import request
-import controller
+from app.nginx import controller
 
 @app.route('/api/create', methods=['POST'])
 @limiter.limit("10 per minute")

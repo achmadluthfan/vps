@@ -1,4 +1,4 @@
-import utility
+from app.nginx import utility
 
 def create_nginx_conf(container_ip: str, site_name: str):
   try:
