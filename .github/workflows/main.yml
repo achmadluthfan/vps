@@ -29,7 +29,7 @@ jobs:
         context: ./Backend/lxc_manager
         file: ./Backend/lxc_manager/Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/my-python-app:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/lxc-manager:latest
     
     - name: Build and push Nginx automation image
       uses: docker/build-push-action@v4
@@ -37,7 +37,7 @@ jobs:
         context: ./Backend/nginx-automation
         file: ./Backend/nginx-automation/Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/my-python-app:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/nginx-automation:latest
 
     - name: Log out from Docker Hub
       run: docker logout
