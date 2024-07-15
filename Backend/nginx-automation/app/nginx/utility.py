@@ -3,7 +3,7 @@ import json
 import os
 import subprocess
 from jinja2 import Environment, FileSystemLoader
-from dotenv
+from dotenv import load_dotenv
 
 load_dotenv()
 
