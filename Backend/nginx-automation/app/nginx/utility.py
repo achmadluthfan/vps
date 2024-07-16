@@ -1,33 +1,44 @@
 import requests
 import os
 import subprocess
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, Template
 from dotenv import load_dotenv
 
 load_dotenv()
 
 NGINX_SITES_AVAILABLE = "/etc/nginx/sites-available"
 NGINX_SITES_ENABLED = "/etc/nginx/sites-enabled"
-TEMPLATES_DIR = "./templates"
 ROOT_SERVER_NAME = os.getenv('ROOT_SERVER_NAME')
 
 def create_nginx_config(site_name: str, container_ip: str):
     try:
-        # Load the Jinja2 template
-        env = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
-        template = env.get_template('nginx.j2')
+        template_path = "./templates"
         
-        # Prepare the configuration content
+        if not os.path.exists(template_path):
+            print(f"[!] Template file not found at: {template_path}")
+            return (False, f"Template file not found at: {template_path}")
+
+        with open(template_path, 'r') as filej2:
+            template_content = filej2.read()
+
+        # Render the template with the given data
         server_name = f"{site_name}.{ROOT_SERVER_NAME}"
-        config_content = template.render(server_name=server_name, container_ip=container_ip)
+        data = {
+            "server_name": server_name,
+            "container_ip": container_ip
+        }
+        j2_template = Template(template_content)
+        config_content = j2_template.render(data)
+
+        # Paths for the new NGINX config and its symlink
         site_config_path = os.path.join(NGINX_SITES_AVAILABLE, site_name)
         symlink_path = os.path.join(NGINX_SITES_ENABLED, site_name)
-        
-        # Write the configuration file
+
+        # Write the rendered configuration to the appropriate file
         with open(site_config_path, 'w') as config_file:
             config_file.write(config_content)
 
-        # Create a symbolic link
+        # Create a symbolic link in the sites-enabled directory
         if not os.path.exists(symlink_path):
             os.symlink(site_config_path, symlink_path)
         else:
@@ -80,11 +91,12 @@ def create_sub_domain(site_name: str):
     if response.status_code == 200:
         print(f"DNS record for {site_name} created successfully.")
         print("Response:", response.json())
-        return True
+        return (True, None)
     else:
         print(f"Failed to create DNS record for {site_name}.")
         print("Response:", response.json())
-        return False
+        return (False, response.json())
   except Exception as e:
-    print(f"[!] Error create sub domain in Cloudflare: {e}")
-    return False
+    message = f"[!] Error create sub domain in Cloudflare: {e}"
+    print(message)
+    return (False, message)
