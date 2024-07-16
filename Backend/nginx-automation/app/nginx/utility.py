@@ -1,8 +1,9 @@
 import requests
 import os
 import subprocess
-from jinja2 import Environment, FileSystemLoader, Template
+from jinja2 import Template
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
 
@@ -12,14 +13,13 @@ ROOT_SERVER_NAME = os.getenv('ROOT_SERVER_NAME')
 
 def create_nginx_config(site_name: str, container_ip: str):
     try:
-        template_path = "./templates"
+        template_path = Path("/app/app/templates/nginx-template.j2")
         
-        if not os.path.exists(template_path):
+        if not template_path.exists():
             print(f"[!] Template file not found at: {template_path}")
             return (False, f"Template file not found at: {template_path}")
 
-        with open(template_path, 'r') as filej2:
-            template_content = filej2.read()
+        template_content = template_path.read_text()
 
         # Render the template with the given data
         server_name = f"{site_name}.{ROOT_SERVER_NAME}"
