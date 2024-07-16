@@ -18,3 +18,5 @@ venv/
 # Other
 dist/
 build/
+
+try.py

@@ -13,13 +13,8 @@ ROOT_SERVER_NAME = os.getenv('ROOT_SERVER_NAME')
 
 def create_nginx_config(site_name: str, container_ip: str):
     try:
-        template_path = Path("/app/app/templates/nginx-template.j2")
-        
-        if not template_path.exists():
-            print(f"[!] Template file not found at: {template_path}")
-            return (False, f"Template file not found at: {template_path}")
-
-        template_content = template_path.read_text()
+        with open('./app/nginx/templates/nginxtemp.j2', 'r') as file:
+            template_content = file.read()
 
         # Render the template with the given data
         server_name = f"{site_name}.{ROOT_SERVER_NAME}"
