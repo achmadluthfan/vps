@@ -105,8 +105,9 @@ def create_sub_domain(site_name: str):
         }
 
         response = requests.post(url, headers=headers, json=data)
-        result = response.json()["result"]
-        dns_record_id = result["id"]
+        response_data = response.json()
+        result = response_data.get("result", {})
+        dns_record_id = result.get("id", None)
 
         if response.status_code == 200:
             print(f"DNS record for {site_name} created successfully.")
@@ -119,7 +120,7 @@ def create_sub_domain(site_name: str):
     except Exception as e:
         message = f"[!] Error create sub domain in Cloudflare: {e}"
         print(message)
-        return (False, message)
+        return (False, response_data)
 
 def generate_port(vmid:int) -> int:
     try:
