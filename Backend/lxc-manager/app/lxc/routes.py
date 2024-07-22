@@ -56,10 +56,15 @@ def shutdown(vmid):
     except Exception:
         return response.failed(500, "Internal server error")
 
-@proxmox_bp.route('/destroy/<vmid>', methods=['DELETE'])
+@proxmox_bp.route('/destroy', methods=['DELETE'])
 def destroy(vmid):
     try:
-        result = controller.destroy(vmid)
+        data = request.get_json()
+        if not data:
+            return response.failed(400, "Get JSON error")
+        vmid = data['vmid']
+        ipv4 = data['ipv4']
+        result = controller.destroy(vmid=vmid, ipv4=ipv4)
         if result == None:
             return response.failed(400, "Destroy failed.")
         return response.success(result)

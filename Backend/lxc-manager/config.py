@@ -19,8 +19,9 @@ class Config(object):
     proxmox_username=os.getenv("PROXMOX_USERNAME")
     proxmox_password=os.getenv("PROXMOX_PASSWORD")
     proxmox_node=os.getenv("PROXMOX_NODE")
-    nginx_automation_url=os.getenv("NGINX_AUTOMATION")
+    deploy_automation_url=os.getenv("DEPLOY_AUTOMATION_URL")
     container_ip_range=os.getenv("CONTAINER_IP_RANGE")
+    container_gateway=os.getenv("CONTAINER_GATEWAY")
     print("[*] Initialize proxmox variable")
   except (Exception, psycopg2.DatabaseError) as e:
     print(f"[!] Database Error : {e}")

@@ -119,13 +119,36 @@ def generate_container_ip(vmid: int) -> str:
         print(f"[!] Error generate container ip: {e}")
         return None
 
-def create_nginx_conf(site_name: str, container_ip: str):
+def deploy(site_name: str, container_ip: str, vmid:int):
     try:
         data = {
             "container_ip": container_ip,
-            "site_name": site_name
+            "site_name": site_name,
+            "vmid": vmid
         }
         response = requests.post(nginx_automation_url, data=json.dumps(data))
+
+        if response.status_code != 200:
+            response_json = response.json()
+            message = response_json['error'].get('message', 'No message provided')
+            print(f"Error Message: {message}")
+            return (False, message)
+        result = response.json()
+        data = result['data']
+        return (True, data)
+    except Exception as e:
+        message = f"[!] Hit API nginx conf: {e}"
+        return (False, message)
+
+def delete_deployed(dns_record_id:str, container_ip:str, site_name:str, port:int):
+    try:
+        data = {
+            "container_ip": container_ip,
+            "site_name": site_name,
+            "port": port,
+            "dns_record_id": dns_record_id
+        }
+        response = requests.delete(nginx_automation_url, data=json.dumps(data))
 
         if response.status_code != 200:
             response_json = response.json()

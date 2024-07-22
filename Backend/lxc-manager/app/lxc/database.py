@@ -5,10 +5,12 @@ from datetime import datetime
 LXC_TABLE = "lxc"
 SSH_KEY_TABLE = "ssh_keys"
 class LXCDB:
-    def __init__(self, vmid, hostname, password, ostemplate, lxc_type):
+    def __init__(self, vmid, uuid, hostname, password, ipv4, ostemplate, lxc_type):
         self.vmid = vmid
+        self.uuid = uuid
         self.hostname = hostname
         self.password = password
+        self.ipv4 = ipv4
         self.ostemplate = ostemplate
         self.lxc_type = lxc_type
         self.created = datetime.now()
@@ -17,8 +19,10 @@ class LXCDB:
     def to_dict(self) -> dict:
         return {
             "vmid": self.vmid,
+            "uuid": self.uuid,
             "hostname": self.hostname,
             "password": self.password,
+            "ipv4": self.ipv4,
             "ostemplate" : self.ostemplate,
             "lxc_type": self.lxc_type,
             "created": self.created,
@@ -28,8 +32,8 @@ class LXCDB:
     def insert_lxc(self):
         try:
             ADD_LXC_QUERY = (
-                f"""INSERT INTO {LXC_TABLE} (created, updated, vmid, hostname, password, ostemplate, lxc_type)
-                VALUES (%s, %s, %s, %s, %s, %s, %s);"""
+                f"""INSERT INTO {LXC_TABLE} (created, updated, vmid, uuid, hostname, password, ipv4, ostemplate, lxc_type)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"""
             )
             with Config.conn.cursor() as cur:
                 cur.execute(ADD_LXC_QUERY, (
@@ -49,7 +53,7 @@ class LXCDB:
             )
             cur.execute(GET_ALL_LXC_QUERRY)
             rows = cur.fetchall()
-            columns = ['vmid', 'created', 'updated', 'hostname', 'password', 'ostemplate', 'lxc_type']
+            columns = ['vmid', 'uuid', 'created', 'updated', 'hostname', 'password', 'ipv4', 'ostemplate', 'lxc_type']
             data = [dict(zip(columns, row)) for row in rows]
             return (True, data)
         except Exception as e:
@@ -121,6 +125,69 @@ class LXCDB:
                 f"""DELETE FROM {SSH_KEY_TABLE} WHERE vmid = %s;"""
             )
             cur.execute(DELETE_SSH_KEY_QUERY, (vmid,))
+            Config.conn.commit()
+            return (True, None)
+        except Exception as e:
+            Config.conn.rollback()
+            return (False, f"[!] Error database delete SSH key: {e}")
+    
+    @staticmethod
+    def insert_server(vmid:int, site_name: str, port: int, dns_record_id:str):
+        try:
+            ADD_LXC_QUERY = (
+                f"""INSERT INTO server (vmid, site_name, port, dns_record_id)
+                VALUES (%s, %s, %s, %s);"""
+            )
+            with Config.conn.cursor() as cur:
+                cur.execute(ADD_LXC_QUERY, (
+                    vmid, site_name, port, dns_record_id
+                ))
+                Config.conn.commit()
+            return True, None
+        except Exception as e:
+            Config.conn.rollback()
+            return False, f"[!] Error adding server data: {e}"
+
+    @staticmethod
+    def get_server_by_vmid(vmid: int):
+        try:
+            GET_SERVER_BY_VM_ID_QUERY = (
+                """SELECT site_name, port, dns_record_id FROM server WHERE vmid = %s"""
+            )
+            cur.execute(GET_SERVER_BY_VM_ID_QUERY, (vmid,))
+            row = cur.fetchone()
+            
+            if row:
+                columns = ['site_name', 'port', 'dns_record_id']
+                data = dict(zip(columns, row))
+                return (True, data)
+            else:
+                return (False, "No record found for the given vmid.")
+        except Exception as e:
+            return (False, f"[!] Error retrieving server by vmid: {e}")
+    
+    @staticmethod
+    def get_all_site_name():
+        try:
+            GET_ALL_SITE_NAME_QUERY = "SELECT site_name FROM server"
+            cur.execute(GET_ALL_SITE_NAME_QUERY)
+            rows = cur.fetchall()
+            
+            if rows:
+                site_name = [row[0] for row in rows]
+                return (True, site_name)
+            else:
+                return (False, "No records found.")
+        except Exception as e:
+            return (False, f"[!] Error retrieving server names: {e}")
+
+    @staticmethod
+    def delete_server(vmid):
+        try:
+            DELETE_SERVER_QUERY = (
+                """DELETE FROM server WHERE vmid = %s;"""
+            )
+            cur.execute(DELETE_SERVER_QUERY, (vmid,))
             Config.conn.commit()
             return (True, None)
         except Exception as e:
