@@ -3,7 +3,6 @@ import os
 import subprocess
 from jinja2 import Template
 from dotenv import load_dotenv
-from pathlib import Path
 
 load_dotenv()
 
@@ -98,7 +97,7 @@ def create_sub_domain(site_name: str):
 
         data = {
             "type": "A",
-            "name": site_name,
+            "name": f"{site_name}.{ROOT_SERVER_NAME}",
             "content": ip_public,
             "ttl": 3600,
             "proxied": True,
@@ -108,12 +107,11 @@ def create_sub_domain(site_name: str):
         response = requests.post(url, headers=headers, json=data)
         result = response.json()["result"]
         dns_record_id = result["id"]
-        name = result["site_name"]
 
         if response.status_code == 200:
             print(f"DNS record for {site_name} created successfully.")
             print("Response:", dns_record_id)
-            return (True, (dns_record_id, name))
+            return (True, (dns_record_id, site_name))
         else:
             print(f"Failed to create DNS record for {site_name}.")
             print("Response:", response.json())

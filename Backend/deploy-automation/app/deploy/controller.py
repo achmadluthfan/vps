@@ -5,8 +5,8 @@ def deploy_container(container_ip: str, site_name: str, vmid: int):
     success_csd, message_csd = utility.create_sub_domain(site_name=site_name)
     if not success_csd:
       return (False, message_csd)
-    result_sd = message_csd
-    dns_record_id, name = result_sd
+    result_csd = message_csd
+    dns_record_id, name = result_csd
     print("Success")
     success_cnc, message_cnc = utility.create_nginx_config(site_name=site_name, container_ip=container_ip)
     if not success_cnc:
