@@ -17,4 +17,4 @@ CORS(app, resources={
     }
 })
 
-from app.nginx import route
+from app.deploy import route
