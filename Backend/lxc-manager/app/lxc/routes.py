@@ -64,6 +64,7 @@ def destroy(vmid):
             return response.failed(400, "Get JSON error")
         vmid = data['vmid']
         ipv4 = data['ipv4']
+        
         result = controller.destroy(vmid=vmid, ipv4=ipv4)
         if result == None:
             return response.failed(400, "Destroy failed.")

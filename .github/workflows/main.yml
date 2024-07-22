@@ -26,18 +26,18 @@ jobs:
     - name: Build and push LXC manager image
       uses: docker/build-push-action@v4
       with:
-        context: ./Backend/lxc_manager
-        file: ./Backend/lxc_manager/Dockerfile
+        context: ./Backend/lxc-manager
+        file: ./Backend/lxc-manager/Dockerfile
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/lxc-manager:latest
     
     - name: Build and push Nginx automation image
       uses: docker/build-push-action@v4
       with:
-        context: ./Backend/nginx-automation
-        file: ./Backend/nginx-automation/Dockerfile
+        context: ./Backend/deploy-automation
+        file: ./Backend/deploy-automation/Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/nginx-automation:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/deploy-automation:latest
 
     - name: Log out from Docker Hub
       run: docker logout
