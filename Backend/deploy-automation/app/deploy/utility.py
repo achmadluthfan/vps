@@ -12,7 +12,7 @@ ROOT_SERVER_NAME = os.getenv('ROOT_SERVER_NAME')
 
 def create_nginx_config(site_name: str, container_ip: str):
     try:
-        with open('./app/nginx/templates/nginxtemp.j2', 'r') as file:
+        with open('./app/deploy/templates/nginxtemp.j2', 'r') as file:
             template_content = file.read()
 
         server_name = f"{site_name}.{ROOT_SERVER_NAME}"
@@ -107,7 +107,7 @@ def create_sub_domain(site_name: str):
         response = requests.post(url, headers=headers, json=data)
         response_data = response.json()
         result = response_data.get("result", {})
-        dns_record_id = result.get("id", None)
+        dns_record_id = result.get("id")
 
         if response.status_code == 200:
             print(f"DNS record for {site_name} created successfully.")
