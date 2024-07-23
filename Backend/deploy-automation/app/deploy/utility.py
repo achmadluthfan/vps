@@ -9,7 +9,8 @@ load_dotenv()
 NGINX_SITES_AVAILABLE = "/etc/nginx/sites-available"
 NGINX_SITES_ENABLED = "/etc/nginx/sites-enabled"
 ROOT_SERVER_NAME = os.getenv('ROOT_SERVER_NAME')
-NGINX_RESTART_BASH = '/app/scripts/restart_nginx.sh'
+NGINX_RESTART_CMD = 'sudo systemctl restart nginx'
+SSH_BASH = './app/scripts/ssh_connection.sh'
 
 def create_nginx_config(site_name: str, container_ip: str):
     try:
@@ -35,7 +36,7 @@ def create_nginx_config(site_name: str, container_ip: str):
         else:
             print(f"[!] Symlink {symlink_path} already exists.")
 
-        result = subprocess.run(['bash', NGINX_RESTART_BASH], capture_output=True, text=True, check=True)
+        result = subprocess.run([SSH_BASH, NGINX_RESTART_CMD], capture_output=True, text=True, check=True)
         if result.returncode == 0:
             return (True, result.stdout)
         else:
@@ -71,7 +72,7 @@ def delete_nginx_conf(site_name:str):
             return (False, f"[!] Configuration file {site_config_path} does not exist.")
         os.remove(site_config_path)
 
-        result = subprocess.run(['bash', NGINX_RESTART_BASH], capture_output=True, text=True, check=True)
+        result = subprocess.run([SSH_BASH, NGINX_RESTART_CMD], capture_output=True, text=True, check=True)
         if result.returncode == 0:
             return (True, result.stdout)
         else:
@@ -158,11 +159,11 @@ def delete_sub_domain(dns_record_id:str):
         return (False, message)
 
 def run_manage_ports(action, port, container_ip, container_port):
-    script_path = '/app/scripts/manage_ports.sh'
-    command = [script_path, action, str(port), container_ip, str(container_port)]
+    script_path = './home/xcode/caas/automate/manage_ports.sh'
+    command = f"{script_path} {action} {str(port)} {container_ip} {str(container_port)}"
 
     try:
-        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        result = subprocess.run([SSH_BASH, command], capture_output=True, text=True, check=True)
         if result.returncode == 0:
             return True, result.stdout
         else:
