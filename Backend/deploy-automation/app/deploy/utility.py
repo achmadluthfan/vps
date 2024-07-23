@@ -1,6 +1,7 @@
 import requests
 import os
 import subprocess
+import paramiko
 from jinja2 import Template
 from dotenv import load_dotenv
 
@@ -36,21 +37,13 @@ def create_nginx_config(site_name: str, container_ip: str):
         else:
             print(f"[!] Symlink {symlink_path} already exists.")
 
-        result = subprocess.run([SSH_BASH, NGINX_RESTART_CMD], capture_output=True, text=True, check=True)
-        if result.returncode == 0:
-            return (True, result.stdout)
-        else:
-            return (False, result.stderr)
+        return (True, None)
     except FileNotFoundError as e:
         message = f"[!] File not found: {e}"
         print(message)
         return (False, message)
     except PermissionError as e:
         message = f"[!] Permission error: {e}"
-        print(message)
-        return (False, message)
-    except subprocess.CalledProcessError as e:
-        message = f"[!] Error reloading NGINX: {e}"
         print(message)
         return (False, message)
     except Exception as e:
@@ -72,24 +65,15 @@ def delete_nginx_conf(site_name:str):
             return (False, f"[!] Configuration file {site_config_path} does not exist.")
         os.remove(site_config_path)
 
-        result = subprocess.run([SSH_BASH, NGINX_RESTART_CMD], capture_output=True, text=True, check=True)
-        if result.returncode == 0:
-            return (True, result.stdout)
-        else:
-            return (False, result.stderr)
+        return (True, None)
     except PermissionError as e:
         message = f"[!] Permission error: {e}"
-        print(message)
-        return (False, message)
-    except subprocess.CalledProcessError as e:
-        message = f"[!] Error reloading NGINX: {e}"
         print(message)
         return (False, message)
     except Exception as e:
         message = f"[!] Error deleting NGINX config: {e}"
         print(message)
         return (False, message)
-
 
 auth_key = os.getenv('API_KEY')
 zone_id = os.getenv('ZONE_ID')
@@ -174,3 +158,25 @@ def run_manage_ports(action, port, container_ip, container_port):
             return (False, result.stderr)
     except subprocess.CalledProcessError as e:
         return (False, e.stderr)
+
+def ssh_connection(command: str):
+    hostname = "host.docker.internal"
+    port = 22
+    username = "xcode"
+    try:
+        private_key = paramiko.RSAKey.from_private_key_file("/root/.ssh/id_rsa")
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        ssh.connect(hostname, port, username, pkey=private_key)
+        _, _, stderr = ssh.exec_command(command)
+
+        error_message = stderr.read().decode()
+        if error_message:
+            return (False, error_message)
+    
+        return (True, None)
+    except Exception as e:
+        return (False, str(e))
+    finally:
+        ssh.close()
