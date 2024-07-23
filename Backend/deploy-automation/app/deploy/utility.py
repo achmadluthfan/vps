@@ -10,7 +10,7 @@ NGINX_SITES_AVAILABLE = "/etc/nginx/sites-available"
 NGINX_SITES_ENABLED = "/etc/nginx/sites-enabled"
 ROOT_SERVER_NAME = os.getenv('ROOT_SERVER_NAME')
 NGINX_RESTART_CMD = 'sudo systemctl restart nginx'
-SSH_BASH = './app/scripts/ssh_connection.sh'
+SSH_BASH = '/app/scripts/ssh_connection.sh'
 
 def create_nginx_config(site_name: str, container_ip: str):
     try:
@@ -163,7 +163,7 @@ def delete_sub_domain(dns_record_id:str):
         return (False, message)
 
 def run_manage_ports(action, port, container_ip, container_port):
-    script_path = './home/xcode/caas/automate/manage_ports.sh'
+    script_path = '/home/xcode/caas/automate/manage_ports.sh'
     command = f"{script_path} {action} {str(port)} {container_ip} {str(container_port)}"
 
     try:
