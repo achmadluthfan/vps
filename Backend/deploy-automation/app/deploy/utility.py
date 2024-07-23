@@ -34,7 +34,7 @@ def create_nginx_config(site_name: str, container_ip: str):
         else:
             print(f"[!] Symlink {symlink_path} already exists.")
 
-        subprocess.run(['systemctl', 'restart', 'nginx'], check=True)
+        subprocess.run(['./app/scripts/restart_nginx.sh'], check=True)
         return (True, None)
     except FileNotFoundError as e:
         message = f"[!] File not found: {e}"
@@ -67,7 +67,7 @@ def delete_nginx_conf(site_name:str):
             return (False, f"[!] Configuration file {site_config_path} does not exist.")
         os.remove(site_config_path)
 
-        subprocess.run(['systemctl', 'restart', 'nginx'], check=True)
+        subprocess.run(['./app/scripts/restart_nginx.sh'], check=True)
         return (True, None)
     except PermissionError as e:
         message = f"[!] Permission error: {e}"
@@ -151,7 +151,7 @@ def delete_sub_domain(dns_record_id:str):
         return (False, message)
 
 def run_manage_ports(action, port, container_ip, container_port):
-    script_path = '/app/manage_ports.sh'
+    script_path = '/app/scripts/manage_ports.sh'
     command = [script_path, action, str(port), container_ip, str(container_port)]
 
     try:
