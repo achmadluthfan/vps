@@ -34,7 +34,7 @@ def delete():
     if not success:
       return response.failed(400, message)
     return response.success({
-      "message" : "success delete deploy automation"
+      "message" : "success delete deployed container"
     })
   except Exception as e:
     print(f"[!] Error route create: {e}")
