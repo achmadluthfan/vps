@@ -114,21 +114,25 @@ def create_sub_domain(site_name: str):
 
         response = requests.post(url, headers=headers, json=data)
         response_data = response.json()
-        result = response_data.get("result", {})
-        dns_record_id = result.get("id")
 
-        if response.status_code == 200:
+        if response.status_code == 200 and response_data.get("success", False):
+            result = response_data.get("result", {})
+            dns_record_id = result.get("id")
             print(f"DNS record for {site_name} created successfully.")
             print("Response:", dns_record_id)
             return (True, (dns_record_id, site_name))
         else:
             print(f"Failed to create DNS record for {site_name}.")
-            print("Response:", response.json())
-            return (False, response.json())
-    except Exception as e:
-        message = f"[!] Error create sub domain in Cloudflare: {e}"
+            print("Response:", response_data)
+            return (False, response_data)
+    except requests.exceptions.RequestException as req_err:
+        message = f"[!] Request error creating subdomain in Cloudflare: {req_err}"
         print(message)
-        return (False, response_data)
+        return (False, message)
+    except Exception as e:
+        message = f"[!] Error creating subdomain in Cloudflare: {e}"
+        print(message)
+        return (False, message)
 
 def generate_port(vmid:int) -> int:
     try:
@@ -165,8 +169,8 @@ def run_manage_ports(action, port, container_ip, container_port):
     try:
         result = subprocess.run([SSH_BASH, command], capture_output=True, text=True, check=True)
         if result.returncode == 0:
-            return True, result.stdout
+            return (True, result.stdout)
         else:
-            return False, result.stderr
+            return (False, result.stderr)
     except subprocess.CalledProcessError as e:
-        return False, e.stderr
+        return (False, e.stderr)

@@ -7,16 +7,19 @@ def deploy_container(container_ip: str, site_name: str, vmid: int):
       return (False, message_csd)
     result_csd = message_csd
     dns_record_id, name = result_csd
-    print("Success")
+
     success_cnc, message_cnc = utility.create_nginx_config(site_name=site_name, container_ip=container_ip)
     if not success_cnc:
       return (False, message_cnc)
+    
     port = utility.generate_port(vmid=vmid)
     if port == None:
       return (False, "Cannot generate port")
+    
     success_rmp, message_rmp = utility.run_manage_ports(action="open", port=port, container_ip=container_ip, container_port=22)
     if not success_rmp:
       return (False, message_rmp)
+    
     data = {
       "server_name": name,
       "port": port,
@@ -24,7 +27,7 @@ def deploy_container(container_ip: str, site_name: str, vmid: int):
     }
     return (True, data)
   except Exception as e:
-    message = f"[!] Error controller create nginx conf: {e}"
+    message = f"[!] Error controller deploy: {e}"
     print(message)
     return (False, message)
 
