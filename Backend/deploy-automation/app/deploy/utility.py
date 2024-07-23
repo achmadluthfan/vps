@@ -35,8 +35,11 @@ def create_nginx_config(site_name: str, container_ip: str):
         else:
             print(f"[!] Symlink {symlink_path} already exists.")
 
-        subprocess.run(['bash', NGINX_RESTART_BASH], capture_output=True, text=True, check=True)
-        return (True, None)
+        result = subprocess.run(['bash', NGINX_RESTART_BASH], capture_output=True, text=True, check=True)
+        if result.returncode == 0:
+            return (True, result.stdout)
+        else:
+            return (False, result.stderr)
     except FileNotFoundError as e:
         message = f"[!] File not found: {e}"
         print(message)
@@ -68,8 +71,11 @@ def delete_nginx_conf(site_name:str):
             return (False, f"[!] Configuration file {site_config_path} does not exist.")
         os.remove(site_config_path)
 
-        subprocess.run(['bash', NGINX_RESTART_BASH], capture_output=True, text=True, check=True)
-        return (True, None)
+        result = subprocess.run(['bash', NGINX_RESTART_BASH], capture_output=True, text=True, check=True)
+        if result.returncode == 0:
+            return (True, result.stdout)
+        else:
+            return (False, result.stderr)
     except PermissionError as e:
         message = f"[!] Permission error: {e}"
         print(message)
