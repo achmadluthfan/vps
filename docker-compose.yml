@@ -13,64 +13,64 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-    networks:
-      - vps_network
+  #   networks:
+  #     - vps_network
 
-  lxc-manager:
-    image: dzakimaulanaasif/lxc-manager:latest
-    container_name: lxc-manager
-    environment:
-      FLASK_APP: app
-      FLASK_ENV: production
-      PROXMOX_USERNAME: root@pam
-      PROXMOX_PASSWORD: xcode2024
-      PROXMOX_HOST: 192.168.40.2
-      PROXMOX_NODE: xcode
-      POSTGRES_HOST: postgres-caas
-      POSTGRES_USERNAME: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: proxmox
-      DEPLOY_AUTOMATION_URL: http://deploy-automation:5000
-      CONTAINER_IP_RANGE: 192.168.40.0/24
-      CONTAINER_GATEWAY: 192.168.40.1
-    ports:
-      - "3000:3000"
-    command: ["python", "run.py"]
-    networks:
-      - vps_network
-    depends_on:
-      - postgres-caas
+  # lxc-manager:
+  #   image: dzakimaulanaasif/lxc-manager:latest
+  #   container_name: lxc-manager
+  #   environment:
+  #     FLASK_APP: app
+  #     FLASK_ENV: production
+  #     PROXMOX_USERNAME: root@pam
+  #     PROXMOX_PASSWORD: xcode2024
+  #     PROXMOX_HOST: 192.168.40.2
+  #     PROXMOX_NODE: xcode
+  #     POSTGRES_HOST: postgres-caas
+  #     POSTGRES_USERNAME: postgres
+  #     POSTGRES_PASSWORD: admin
+  #     POSTGRES_PORT: 5432
+  #     POSTGRES_DB: proxmox
+  #     DEPLOY_AUTOMATION_URL: http://deploy-automation:5000
+  #     CONTAINER_IP_RANGE: 192.168.40.0/24
+  #     CONTAINER_GATEWAY: 192.168.40.1
+  #   ports:
+  #     - "3000:3000"
+  #   command: ["python", "run.py"]
+  #   networks:
+  #     - vps_network
+  #   depends_on:
+  #     - postgres-caas
 
-  deploy-automation:
-    image: dzakimaulanaasif/deploy-automation:latest
-    container_name: deploy-automation
-    environment:
-      FLASK_APP: app
-      FLASK_RUN_HOST: 0.0.0.0
-      FLASK_RUN_PORT: 5000
-      API_KEY: NxIpYuEoQdIhYD4bdq2QI6x0FQHvtuVt3INdmyAy
-      ZONE_ID: 53a1bb5ac41d5eab5bab1e4f8c4b9ef0
-      IP_PUBLIC: 103.174.114.68
-      ROOT_SERVER_NAME: wehos.online
-    volumes:
-      - /usr/bin:/usr/bin
-      - /home/xcode/.ssh/id_rsa:/root/.ssh/id_rsa:ro
-      - /etc/nginx/sites-available:/etc/nginx/sites-available:rw
-      - /etc/nginx/sites-enabled:/etc/nginx/sites-enabled:rw
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    ports:
-      - "5000:5000" 
-    command: ["python", "run.py"]
-    networks:
-      - vps_network
-    depends_on:
-      - lxc-manager
+  # deploy-automation:
+  #   image: dzakimaulanaasif/deploy-automation:latest
+  #   container_name: deploy-automation
+  #   environment:
+  #     FLASK_APP: app
+  #     FLASK_RUN_HOST: 0.0.0.0
+  #     FLASK_RUN_PORT: 5000
+  #     API_KEY: NxIpYuEoQdIhYD4bdq2QI6x0FQHvtuVt3INdmyAy
+  #     ZONE_ID: 53a1bb5ac41d5eab5bab1e4f8c4b9ef0
+  #     IP_PUBLIC: 103.174.114.68
+  #     ROOT_SERVER_NAME: wehos.online
+  #   volumes:
+  #     - /usr/bin:/usr/bin
+  #     - /home/xcode/.ssh/id_rsa:/root/.ssh/id_rsa:ro
+  #     - /etc/nginx/sites-available:/etc/nginx/sites-available:rw
+  #     - /etc/nginx/sites-enabled:/etc/nginx/sites-enabled:rw
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  #   ports:
+  #     - "5000:5000" 
+  #   command: ["python", "run.py"]
+  #   networks:
+  #     - vps_network
+  #   depends_on:
+  #     - lxc-manager
   
 volumes:
   postgres_data:
 
-networks:
-  vps_network:
-    driver: bridge
+# networks:
+#   vps_network:
+#     driver: bridge
