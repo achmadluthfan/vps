@@ -102,7 +102,7 @@ def create_sub_domain(site_name: str):
             dns_record_id = result.get("id")
             print(f"DNS record for {site_name} created successfully.")
             print("Response:", dns_record_id)
-            return (True, (dns_record_id, site_name))
+            return (True, dns_record_id)
         else:
             print(f"Failed to create DNS record for {site_name}.")
             print("Response:", response_data)

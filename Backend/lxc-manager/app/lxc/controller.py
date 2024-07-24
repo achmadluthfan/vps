@@ -6,6 +6,9 @@ from .database import LXCDB
 from config import Config
 import io
 
+MAIN_SERVER_NAME = "wehos.online"
+MAIN_SERVER_IP = "103.174.114.68"
+
 def data():
     try:
         result = []
@@ -14,36 +17,48 @@ def data():
         if not success:
             message = dorm
             print(message)
-            return None
+            return (False, None)
         
         data = dorm
         if data != []:
             for d in data:
                 vmid = d['vmid']
 
-                ipv4 = None
-                success_interfaces, interfaces_info = utility.interfaces(vmid)
-                if success_interfaces and interfaces_info != None:
-                    if 'inet' in interfaces_info[1]:
-                        ipv4 = interfaces_info[1]["inet"]
+                # success_interfaces, interfaces_info = utility.interfaces(vmid)
+                # if success_interfaces and interfaces_info != None:
+                #     if 'inet' in interfaces_info[1]:
+                #         ipv4 = interfaces_info[1]["inet"]
 
                 success_status, status_info = utility.status(vmid)
                 if not success_status:
-                    print(f"[!] Status info error: {status_info}")      
+                    print(f"[!] Status info error: {status_info}")    
+                
+                success_gsbv, dorm_gsbv = LXCDB.get_server_by_vmid(vmid)
+                if not success_gsbv:
+                    message = dorm_gsbv
+                    print(message)
+                    return (False, None)
+                data_gsbv = dorm_gsbv
+                site_name = data_gsbv['site_name']
+                website = f"{site_name}.{MAIN_SERVER_NAME}"
+                port = data_gsbv['port']
 
                 result.append({
-                "hostname": d['hostname'],
                 "vmid" : vmid,
                 "user" : "root",
                 "password" : d['password'],
-                'ipv4' : ipv4,
-                'status' : status_info['status']
+                "status" : status_info['status'],
+                "server": {
+                    "website": website,
+                    "port": port,
+                    "host": MAIN_SERVER_IP
+                }
                 })
-        return result
+        return (True, result)
 
     except Exception as e:
         print(f'Controller data error: {e}')
-        return None
+        return (False, None)
 
 def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:str):
     try:
@@ -71,18 +86,18 @@ def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:s
         if not success_key:
             message = dorm_key
             print(message)
-            return None
+            return (False, None)
         private_key, public_key = dorm_key
 
         vmid = utility.generate_vmid()
         if vmid == None:
             print(f"[!] VMID is None")
-            return None
+            return (False, None)
         
         ipv4 = utility.generate_container_ip(vmid=vmid)
         if ipv4 == None:
             print(f"[!] IPV4 is None")
-            return None
+            return (False, None)
         gateway = Config.container_gateway
         ipv4wmask = ipv4 + Config.container_ip_range[-3:]
         
@@ -97,7 +112,7 @@ def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:s
         if not success_create:
             message = dorm_create
             print(message)
-            return None
+            return (False, message)
 
         time.sleep(5)
         
@@ -109,7 +124,7 @@ def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:s
         if not success_d:
             message = dorm_d
             print(f"[!] Error controller deploy: {message}")
-            return None
+            return (False, None)
         data_d = dorm_d
         dns_record_id = data_d['dns_record_id']
         port = data_d['port']
@@ -122,27 +137,24 @@ def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:s
             lxc_type=lxc_type,
             ipv4=ipv4
         )
-        success_add, dorm_add = lxc.insert_lxc()
-        if success_add:
-            keyname = f"{container_params['vmid']}_{hostname}"
-            success_key_db, dorm_key_db = LXCDB.insert_ssh_key(vmid=container_params['vmid'], key_name=keyname, private_key=private_key, public_key=public_key)
-            if success_key_db:
-                success_is, dorm_is = LXCDB.insert_server(vmid=vmid, site_name=site_name, dns_record_id=dns_record_id, port=port)
-                if success_is:
-                    return {
-                    'message' : message
-                    }
-                message = dorm_is
-            message = dorm_key_db
-            print(message)
-            
-        message = dorm_add
-        print(message)
-        return None
+        success_il, dorm_il = lxc.insert_lxc()
+        if not success_il:
+            return (False, f"Failed to insert LXC record: {dorm_il}")
+
+        keyname = f"{container_params['vmid']}_{hostname}"
+        success_isk, dorm_isk = LXCDB.insert_ssh_key(vmid=container_params['vmid'], key_name=keyname, private_key=private_key, public_key=public_key)
+        if not success_isk:
+            return (False, f"Failed to insert SSH key: {dorm_isk}")
+
+        success_is, dorm_is = LXCDB.insert_server(vmid=vmid, site_name=site_name, dns_record_id=dns_record_id, port=port)
+        if not success_is:
+            return (False, f"Failed to insert server record: {dorm_is}")
+        
+        return (True, {'message': "Successfully created LXC"})
     except Exception as e:
         message = f"[!] Controller error create LXC: {e}"
         print(message)
-        return None
+        return (False, None)
     
 def start(vmid: int):
     try:
@@ -150,14 +162,15 @@ def start(vmid: int):
         if not success:
             message = dorm
             print(message)
-            return None
-        return {
+            return (False, message)
+        data = {
             'message' : 'Start was successful.'
         }
+        return (True, data)
     except Exception as e:
         message = f"[!] Controller error start LXC: {e}"
         print(message)
-        return None
+        return (False, None)
 
 def shutdown(vmid: int):
     try:
@@ -165,34 +178,40 @@ def shutdown(vmid: int):
         if not success:
             message = dorm
             print(message)
-            return None
-        return {
+            return (False, message)
+        data = {
             'message' : 'Shutdown was successful.'
         }
+        return (True, data)
     except Exception as e:
         message = f"[!] Controller error shutdown LXC: {e}"
         print(message)
-        return None
+        return (False, None)
 
-def destroy(vmid: int, ipv4: str):
+def destroy(vmid: int):
     try:
+        ipv4 = utility.generate_container_ip(vmid=vmid)
+        if not ipv4:
+            message = "failed to generate ipv4"
+            return (False, message)
+
         success_destroy, dorm_destroy = utility.destroy(vmid)
         if not success_destroy:
             message = dorm_destroy
             print(message)
-            return None
+            return (False, message)
         
         success_delete_key, dorm_delete_key = LXCDB.delete_ssh_key(vmid)
         if not success_delete_key:
             message = dorm_delete_key
             print(message)
-            return None
+            return (False, None)
         
         success_gsbv, dorm_gsbv = LXCDB.get_server_by_vmid(vmid=vmid)
         if not success_gsbv:
             message = dorm_gsbv
             print(message)
-            return None
+            return (False, None)
         data = dorm_gsbv
         site_name = data['site_name']
         port = data['port']
@@ -202,27 +221,28 @@ def destroy(vmid: int, ipv4: str):
         if not success_dd:
             message = dorm_dd
             print(message)
-            return None
+            return (False, None)
         
         success_ds, dorm_ds = LXCDB.delete_server(vmid=vmid)
         if not success_ds:
             message = dorm_ds
             print(message)
-            return None
+            return (False, None)
         
         success_delete_data, dorm_delete_data = LXCDB.delete_lxc(vmid)
         if not success_delete_data:
             message = dorm_delete_data
             print(message)
-            return None
+            return (False, None)
         
-        return {
+        data = {
             'message' : 'Destroy was successful.'
         }
+        return (True, data)
     except Exception as e:
         message = f"[!] Controller error destroy LXC: {e}"
         print(message)
-        return None
+        return (False, None)
 
 def download_key(vmid: int):
     try:
@@ -230,12 +250,12 @@ def download_key(vmid: int):
         if not success:
             message = dorm
             print(message)
-            return None
+            return (False, None)
         private_key, key_name = dorm
         private_key_io = io.BytesIO(private_key.encode('utf-8'))
         private_key_io.seek(0) 
-        return (private_key_io, key_name)
+        return (True, (private_key_io, key_name))
     except Exception as e:
         message = f"[!] Controller download key LXC: {e}"
         print(message)
-        return None
+        return (False, None)

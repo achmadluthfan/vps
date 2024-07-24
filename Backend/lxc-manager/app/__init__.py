@@ -9,5 +9,5 @@ CORS(app)
 
 cur = Config.conn.cursor()
 
-from app.lxc.routes import proxmox_bp
-app.register_blueprint(proxmox_bp, url_prefix='/proxmox/lxc')
+from app.lxc.routes import lxc_bp
+app.register_blueprint(lxc_bp, url_prefix='/proxmox/lxc')

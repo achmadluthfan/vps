@@ -8,7 +8,7 @@ def deploy_container(container_ip: str, site_name: str, vmid: int):
     if not success_csd:
       return (False, message_csd)
     result_csd = message_csd
-    dns_record_id, name = result_csd
+    dns_record_id = result_csd
 
     success_cnc, message_cnc = utility.create_nginx_config(site_name=site_name, container_ip=container_ip)
     if not success_cnc:
@@ -29,7 +29,6 @@ def deploy_container(container_ip: str, site_name: str, vmid: int):
       return (False, message_mp)
     
     data = {
-      "server_name": name,
       "port": port,
       "dns_record_id": dns_record_id
     }
