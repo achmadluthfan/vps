@@ -11,7 +11,7 @@ proxmox_host = Config.proxmox_host
 proxmox_username = Config.proxmox_username
 proxmox_password = Config.proxmox_password
 proxmox_node = Config.proxmox_node
-nginx_automation_url = Config.nginx_automation_url
+deploy_automation_url = Config.deploy_automation_url
 containter_ip_range = Config.container_ip_range
 
 proxmox = ProxmoxAPI(host=proxmox_host, user=proxmox_username, password=proxmox_password, verify_ssl=False)
@@ -126,7 +126,7 @@ def deploy(site_name: str, container_ip: str, vmid:int):
             "site_name": site_name,
             "vmid": vmid
         }
-        response = requests.post(nginx_automation_url, data=json.dumps(data))
+        response = requests.post(f"{deploy_automation_url}/api/deploy", data=json.dumps(data))
 
         if response.status_code != 200:
             response_json = response.json()
@@ -148,7 +148,7 @@ def delete_deployed(dns_record_id:str, container_ip:str, site_name:str, port:int
             "port": port,
             "dns_record_id": dns_record_id
         }
-        response = requests.delete(nginx_automation_url, data=json.dumps(data))
+        response = requests.delete(f"{deploy_automation_url}/api/delete", data=json.dumps(data))
 
         if response.status_code != 200:
             response_json = response.json()
