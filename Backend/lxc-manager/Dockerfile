@@ -10,8 +10,5 @@ RUN pip install --no-cache-dir -r ./requirements.txt
 
 EXPOSE 3000
 
-ENV FLASK_APP=app
-ENV FLASK_RUN_HOST=0.0.0.0
-
 # Run the application
 CMD ["python", "run.py"]
