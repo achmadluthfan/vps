@@ -172,11 +172,8 @@ class LXCDB:
             cur.execute(GET_ALL_SITE_NAME_QUERY)
             rows = cur.fetchall()
             
-            if rows:
-                site_name = [row[0] for row in rows]
-                return (True, site_name)
-            else:
-                return (False, "No records found.")
+            site_names = [row[0] for row in rows]
+            return (True, site_names)
         except Exception as e:
             return (False, f"[!] Error retrieving server names: {e}")
 
