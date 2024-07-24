@@ -1,5 +1,4 @@
-from app import cur
-from config import Config
+from app import cur, config
 from datetime import datetime
 
 LXC_TABLE = "lxc"
@@ -35,14 +34,14 @@ class LXCDB:
                 f"""INSERT INTO {LXC_TABLE} (created, updated, vmid, uuid, hostname, password, ipv4, ostemplate, lxc_type)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"""
             )
-            with Config.conn.cursor() as cur:
+            with config.conn.cursor() as cur:
                 cur.execute(ADD_LXC_QUERY, (
                     self.created, self.updated, self.vmid, self.hostname, self.password, self.ostemplate, self.lxc_type
                 ))
-                Config.conn.commit()
+                config.conn.commit()
             return True, None
         except Exception as e:
-            Config.conn.rollback()
+            config.conn.rollback()
             return False, f"[!] Error adding LXC data: {e}"
     
     @staticmethod
@@ -67,10 +66,10 @@ class LXCDB:
                 f"""DELETE FROM {LXC_TABLE} WHERE vmid = %s;"""
             )
             cur.execute(DELETE_LXC_QUERY, (vmid,))
-            Config.conn.commit()
+            config.conn.commit()
             return (True, None)
         except Exception as e:
-            Config.conn.rollback()
+            config.conn.rollback()
             return (False, f"[!] Error database delete LXC: {e}")
     
     @staticmethod
@@ -98,10 +97,10 @@ class LXCDB:
         """
             )
             cur.execute(INSERT_SSH_KEY, (vmid, key_name, private_key, public_key, ))
-            Config.conn.commit()
+            config.conn.commit()
             return (True, None)
         except Exception as e:
-            Config.conn.rollback()
+            config.conn.rollback()
             return (False, f"[!] Error database insert ssh key: {e}")
     
     @staticmethod
@@ -125,10 +124,10 @@ class LXCDB:
                 f"""DELETE FROM {SSH_KEY_TABLE} WHERE vmid = %s;"""
             )
             cur.execute(DELETE_SSH_KEY_QUERY, (vmid,))
-            Config.conn.commit()
+            config.conn.commit()
             return (True, None)
         except Exception as e:
-            Config.conn.rollback()
+            config.conn.rollback()
             return (False, f"[!] Error database delete SSH key: {e}")
     
     @staticmethod
@@ -138,14 +137,14 @@ class LXCDB:
                 f"""INSERT INTO server (vmid, site_name, port, dns_record_id)
                 VALUES (%s, %s, %s, %s);"""
             )
-            with Config.conn.cursor() as cur:
+            with config.conn.cursor() as cur:
                 cur.execute(ADD_LXC_QUERY, (
                     vmid, site_name, port, dns_record_id
                 ))
-                Config.conn.commit()
+                config.conn.commit()
             return True, None
         except Exception as e:
-            Config.conn.rollback()
+            config.conn.rollback()
             return False, f"[!] Error adding server data: {e}"
 
     @staticmethod
@@ -188,8 +187,8 @@ class LXCDB:
                 """DELETE FROM server WHERE vmid = %s;"""
             )
             cur.execute(DELETE_SERVER_QUERY, (vmid,))
-            Config.conn.commit()
+            config.conn.commit()
             return (True, None)
         except Exception as e:
-            Config.conn.rollback()
+            config.conn.rollback()
             return (False, f"[!] Error database delete SSH key: {e}")

@@ -1,5 +1,5 @@
 from proxmoxer import ProxmoxAPI
-from config import Config
+from app import config
 from .database import LXCDB
 import paramiko
 import io
@@ -7,12 +7,12 @@ import requests
 import json
 
 # Proxmox variable
-proxmox_host = Config.proxmox_host
-proxmox_username = Config.proxmox_username
-proxmox_password = Config.proxmox_password
-proxmox_node = Config.proxmox_node
-deploy_automation_url = Config.deploy_automation_url
-containter_ip_range = Config.container_ip_range
+proxmox_host = config.proxmox_host
+proxmox_username = config.proxmox_username
+proxmox_password = config.proxmox_password
+proxmox_node = config.proxmox_node
+deploy_automation_url = config.deploy_automation_url
+containter_ip_range = config.container_ip_range
 
 proxmox = ProxmoxAPI(host=proxmox_host, user=proxmox_username, password=proxmox_password, verify_ssl=False)
 node = 'xcode'

@@ -2,8 +2,8 @@ import json
 import time
 import os
 from app.lxc import utility
+from app import config
 from .database import LXCDB
-from config import Config
 import io
 
 MAIN_SERVER_NAME = "wehos.online"
@@ -98,8 +98,8 @@ def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:s
         if ipv4 == None:
             print(f"[!] IPV4 is None")
             return (False, None)
-        gateway = Config.container_gateway
-        ipv4wmask = ipv4 + Config.container_ip_range[-3:]
+        gateway = config.container_gateway
+        ipv4wmask = ipv4 + config.container_ip_range[-3:]
         
         container_params['vmid'] = vmid
         container_params['ostemplate'] = ostemplate
