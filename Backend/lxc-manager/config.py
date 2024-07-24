@@ -38,5 +38,3 @@ class Config(object):
                 time.sleep(5)  # Wait for 5 seconds before retrying
         
         raise Exception("Failed to connect to PostgreSQL after several attempts")
-
-config = Config()
