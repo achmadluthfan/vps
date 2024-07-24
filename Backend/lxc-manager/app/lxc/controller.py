@@ -131,6 +131,7 @@ def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:s
 
         lxc = LXCDB(
             vmid=container_params['vmid'],
+            uuid=None,
             hostname=container_params['hostname'],
             password=container_params['password'],
             ostemplate=container_params['ostemplate'],
