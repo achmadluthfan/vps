@@ -16,9 +16,3 @@ cur = config.conn.cursor()
 from app.lxc.routes import lxc_bp
 app.register_blueprint(lxc_bp, url_prefix='/proxmox/lxc')
 
-@app.teardown_appcontext
-def close_db(error):
-    if cur:
-        cur.close()
-    if Config.conn:
-        Config.conn.close()
