@@ -86,18 +86,20 @@ def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:s
         if not success_key:
             message = dorm_key
             print(message)
-            return (False, None)
+            return (False, message)
         private_key, public_key = dorm_key
 
         vmid = utility.generate_vmid()
         if vmid == None:
-            print(f"[!] VMID is None")
-            return (False, None)
+            message = f"[!] VMID is None"
+            print(message)
+            return (False, message)
         
         ipv4 = utility.generate_container_ip(vmid=vmid)
         if ipv4 == None:
-            print(f"[!] IPV4 is None")
-            return (False, None)
+            message = f"[!] IPV4 is None: {ipv4}"
+            print(message)
+            return (False, message)
         gateway = config.container_gateway
         ipv4wmask = ipv4 + config.container_ip_range[-3:]
         
