@@ -113,7 +113,7 @@ def generate_vmid() -> int:
 def generate_container_ip(vmid: int) -> str:
     try:
         x = vmid - 100 + 3
-        continer_ip = containter_ip_range[:-4] + x
+        continer_ip = containter_ip_range[:-4] + str(x)
         return continer_ip
     except Exception as e:
         print(f"[!] Error generate container ip: {e}")
