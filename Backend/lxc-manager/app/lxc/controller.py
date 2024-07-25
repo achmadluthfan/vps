@@ -125,8 +125,9 @@ def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:s
         success_d, dorm_d = utility.deploy(site_name=site_name, container_ip=ipv4, vmid=vmid)
         if not success_d:
             message = dorm_d
-            print(f"[!] Error controller deploy: {message}")
-            return (False, None)
+            message = f"[!] Error controller deploy: {message}"
+            print(message)
+            return (False, message)
         data_d = dorm_d
         dns_record_id = data_d['dns_record_id']
         port = data_d['port']
@@ -157,7 +158,7 @@ def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:s
     except Exception as e:
         message = f"[!] Controller error create LXC: {e}"
         print(message)
-        return (False, None)
+        return (False, message)
     
 def start(vmid: int):
     try:
