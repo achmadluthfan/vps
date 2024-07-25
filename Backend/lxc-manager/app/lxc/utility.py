@@ -119,22 +119,25 @@ def generate_container_ip(vmid: int) -> str:
         print(f"[!] Error generate container ip: {e}")
         return None
 
-def deploy(site_name: str, container_ip: str, vmid:int):
+def deploy(site_name: str, container_ip: str, vmid: int):
     try:
         data = {
             "container_ip": container_ip,
             "site_name": site_name,
             "vmid": vmid
         }
-        response = requests.post(f"{deploy_automation_url}/api/deploy", data=json.dumps(data))
+        headers = {
+            "Content-Type": "application/json"
+        }
+        response = requests.post(f"{deploy_automation_url}/api/deploy", data=json.dumps(data), headers=headers)
 
         if response.status_code != 200:
             response_json = response.json()
-            message = response_json['error'].get('message', 'No message provided')
+            message = response_json.get('error', {}).get('message', 'No message provided')
             print(f"Error Message: {message}")
             return (False, message)
         result = response.json()
-        data = result['data']
+        data = result.get('data', {})
         return (True, data)
     except Exception as e:
         message = f"[!] Hit API nginx conf: {e}"
@@ -148,7 +151,10 @@ def delete_deployed(dns_record_id:str, container_ip:str, site_name:str, port:int
             "port": port,
             "dns_record_id": dns_record_id
         }
-        response = requests.delete(f"{deploy_automation_url}/api/delete", data=json.dumps(data))
+        headers = {
+            "Content-Type": "application/json"
+        }
+        response = requests.delete(f"{deploy_automation_url}/api/delete", data=json.dumps(data), headers=headers)
 
         if response.status_code != 200:
             response_json = response.json()
