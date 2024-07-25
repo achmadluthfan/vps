@@ -73,7 +73,7 @@ def shutdown(vmid):
 @lxc_bp.route('/destroy/<vmid>', methods=['DELETE'])
 def destroy(vmid):
     try:
-        success, message = controller.destroy(vmid=vmid)
+        success, message = controller.destroy(vmid=int(vmid))
         if not success:
             if message == None:
                 return response.failed(400, "Destroy failed.")
