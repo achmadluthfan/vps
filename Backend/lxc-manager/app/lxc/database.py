@@ -36,7 +36,7 @@ class LXCDB:
             )
             with config.conn.cursor() as cur:
                 cur.execute(ADD_LXC_QUERY, (
-                    self.created, self.updated, self.vmid, self.hostname, self.password, self.ostemplate, self.lxc_type
+                    self.created, self.updated, self.vmid, self.uuid, self.hostname, self.password, self.ipv4, self.ostemplate, self.lxc_type
                 ))
                 config.conn.commit()
             return True, None
