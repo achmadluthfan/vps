@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import request, g
 from app.lxc.database import LXCDB
-import response
+from app import response
 
 def own_lxc(f):
   @wraps(f)
