@@ -20,6 +20,7 @@ def own_lxc(f):
     if vmid not in vmid_user_list:
       return response.failed(401, "Unauthorized!")
     return f(*args, **kwargs)
+  decorated_function.__name__ = f.__name__
   return decorated_function
     
 def auth_required(f):
@@ -28,4 +29,5 @@ def auth_required(f):
     if not g.uuid:
       return response.failed(401, "Unauthorized!")
     return f(*args, **kwargs)
+  decorated_function.__name__ = f.__name__
   return decorated_function
