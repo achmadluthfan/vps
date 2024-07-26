@@ -67,6 +67,16 @@ services:
       - caas_networks
     depends_on:
       - lxc-manager
+  
+  fe-caas:
+    image: lutpann/fe-caas:1.4
+    container_name: fe-caas
+    environment:
+      DATABASE_URL: postgres-caas
+    ports:
+      - "8080:8080"
+    networks:
+      - caas_networks
 
 volumes:
   postgres_data:
