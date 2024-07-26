@@ -45,12 +45,12 @@ class LXCDB:
             return False, f"[!] Error adding LXC data: {e}"
     
     @staticmethod
-    def get_all_lxc():
+    def get_user_lxc(uuid: str):
         try:
             GET_ALL_LXC_QUERRY = (
-                f"""SELECT * FROM {LXC_TABLE};"""
+                f"""SELECT * FROM {LXC_TABLE} WHERE uuid = %s;"""
             )
-            cur.execute(GET_ALL_LXC_QUERRY)
+            cur.execute(GET_ALL_LXC_QUERRY, (uuid, ))
             rows = cur.fetchall()
             columns = ['vmid', 'uuid', 'created', 'updated', 'hostname', 'password', 'ipv4', 'ostemplate', 'lxc_type']
             data = [dict(zip(columns, row)) for row in rows]
@@ -79,6 +79,19 @@ class LXCDB:
                 f"""SELECT vmid FROM {LXC_TABLE};"""
             )
             cur.execute(ALL_VMID_LXC)
+            vmid_data = cur.fetchall()
+            vmid_list = [row[0] for row in vmid_data]
+            return (True, vmid_list)
+        except Exception as e:
+            return (False, f"[!] Error database get all vmid LXC: {e}")
+    
+    @staticmethod
+    def get_user_vmid(uuid: str):
+        try:
+            ALL_VMID_LXC = (
+                f"""SELECT vmid FROM {LXC_TABLE} WHERE uuid = %s;"""
+            )
+            cur.execute(ALL_VMID_LXC, (uuid, ))
             vmid_data = cur.fetchall()
             vmid_list = [row[0] for row in vmid_data]
             return (True, vmid_list)

@@ -9,11 +9,11 @@ import io
 MAIN_SERVER_NAME = "wehos.online"
 MAIN_SERVER_IP = "103.174.114.68"
 
-def data():
+def data(uuid: str):
     try:
         result = []
         
-        success, dorm = LXCDB.get_all_lxc()
+        success, dorm = LXCDB.get_user_lxc(uuid=uuid)
         if not success:
             message = dorm
             print(message)
@@ -23,11 +23,6 @@ def data():
         if data != []:
             for d in data:
                 vmid = d['vmid']
-
-                # success_interfaces, interfaces_info = utility.interfaces(vmid)
-                # if success_interfaces and interfaces_info != None:
-                #     if 'inet' in interfaces_info[1]:
-                #         ipv4 = interfaces_info[1]["inet"]
 
                 success_status, status_info = utility.status(vmid)
                 if not success_status:
@@ -60,7 +55,7 @@ def data():
         print(f'Controller data error: {e}')
         return (False, None)
 
-def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:str):
+def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:str, uuid:str):
     try:
         success_gasn, dorm_gasn = LXCDB.get_all_site_name()
         if not success_gasn:
@@ -134,7 +129,7 @@ def create(lxc_type: str, ostemp: str, hostname: str, password: str, site_name:s
 
         lxc = LXCDB(
             vmid=container_params['vmid'],
-            uuid=None,
+            uuid=uuid,
             hostname=container_params['hostname'],
             password=container_params['password'],
             ostemplate=container_params['ostemplate'],

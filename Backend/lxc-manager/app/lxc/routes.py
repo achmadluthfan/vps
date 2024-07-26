@@ -1,13 +1,14 @@
-from flask import Blueprint, request, send_file
+from flask import Blueprint, request, send_file, g
 from app import response
-from app.lxc import controller
+from app.lxc import controller, middleware
 
 lxc_bp = Blueprint('lxc_bp', __name__)
 
 @lxc_bp.route('/', methods=['GET'])
+@middleware.auth_required
 def home():
     try:
-        success, message = controller.data()
+        success, message = controller.data(uuid=g.data)
         if not success:
             if message == None:
                 return response.failed(400, "Something went wrong while fetching data.")
@@ -17,6 +18,7 @@ def home():
         return response.failed(500, "Internal server error")
 
 @lxc_bp.route('/create', methods=['POST'])
+@middleware.auth_required
 def create_lxc():
     try:
         data = request.get_json()
@@ -36,7 +38,8 @@ def create_lxc():
             ostemp=ostemplate,
             hostname=hostname,
             password=password,
-            site_name=site_name
+            site_name=site_name,
+            uuid=g.uuid
         )
         if not success:
             if message == None:
@@ -47,6 +50,7 @@ def create_lxc():
         return response.failed(500, "Internal server error")
     
 @lxc_bp.route('/start/<vmid>', methods=['POST'])
+@middleware.own_lxc
 def start(vmid):
     try:
         success, message = controller.start(vmid)
@@ -59,6 +63,7 @@ def start(vmid):
         return response.failed(500, "Internal server error")
 
 @lxc_bp.route('/shutdown/<vmid>', methods=['POST'])
+@middleware.own_lxc
 def shutdown(vmid):
     try:
         success, message = controller.shutdown(vmid)
@@ -71,6 +76,7 @@ def shutdown(vmid):
         return response.failed(500, "Internal server error")
 
 @lxc_bp.route('/destroy/<vmid>', methods=['DELETE'])
+@middleware.own_lxc
 def destroy(vmid):
     try:
         success, message = controller.destroy(vmid=int(vmid))
@@ -83,6 +89,7 @@ def destroy(vmid):
         return response.failed(500, "Internal server error")
 
 @lxc_bp.route('/download/key/<vmid>', methods=['GET'])
+@middleware.own_lxc
 def download_key(vmid):
     try:
         success, message = controller.download_key(vmid=vmid)
