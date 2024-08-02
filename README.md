@@ -12,10 +12,10 @@ How our CaaS platform works:
 4. **Publish Web Content**: Your web content will be live on the internet through your designated subdomain.
 ## 🤨Preparation
 Before using this project, make sure you have the following software and tools installed:
-1. **Proxmox VE**: Required for generate container that is Linux Container (LXC). [Download Proxmox VE ISO]([https://www.docker.com/get-started](https://www.proxmox.com/en/downloads)
+1. **Proxmox VE**: Required for generate container that is Linux Container (LXC). [Download Proxmox VE ISO](https://www.proxmox.com/en/downloads)
 2. **Virtual Private Server**: Deploy and manage the applications.
 3. **VPN Server and Client**: Connect Proxmox from local with applications inside VPS using secure communication.
-4. **Domain and Hosting**: Create subdomain and make it accessible from outside. [Cloudflare]([https://code.visualstudio.com/](https://dash.cloudflare.com/)
+4. **Domain and Hosting**: Create subdomain and make it accessible from outside. [Cloudflare](https://dash.cloudflare.com/)
 ## 😏Getting Started
 Here’s an overview of the installation structure:
 ```
