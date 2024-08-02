@@ -1,17 +1,6 @@
 version: '3.8'
 
 services:
-<<<<<<< HEAD
-  postgres_vps:
-    image: postgres
-    container_name: postgres-vps
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
-      POSTGRES_DB: ${POSTGRES_DB:-proxmox}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-=======
   postgres-caas:
     image: postgres
     container_name: postgres-caas
@@ -21,43 +10,10 @@ services:
       POSTGRES_DB: proxmox
     ports:
       - "5432:5432"
->>>>>>> develop
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     networks:
-<<<<<<< HEAD
-      - vps_network
-
-  lxc_vps:
-    image: your-lxc-image:latest
-    container_name: lxc-vps
-    environment:
-      FLASK_APP: ${FLASK_APP:-app}
-      FLASK_ENV: ${FLASK_ENV:-production}
-      PROXMOX_USERNAME: ${PROXMOX_USERNAME:-root}
-      PROXMOX_PASSWORD: ${PROXMOX_PASSWORD:-xcode}
-      PROXMOX_HOST: ${PROXMOX_HOST:-postgres_vps}
-      PROXMOX_NODE: ${PROXMOX_NODE:-pve}
-      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
-      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
-      POSTGRES_DB: ${POSTGRES_DB:-proxmox}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
-    ports:
-      - "${HOST_PORT:-3000}:80"
-    networks:
-      - vps_network
-    depends_on:
-      - postgres
-
-volumes:
-  postgres_data:
-
-networks:
-  vps_network:
-    driver: bridge
-=======
       - caas_networks
 
   lxc-manager:
@@ -113,14 +69,15 @@ networks:
       - lxc-manager
   
   fe-caas:
-    image: lutpann/fe-caas:2.4
+    image: lutpann/fe-caas:2.6
     container_name: fe-caas
-    environment:
-      DATABASE_URL: postgres-caas
     ports:
       - "8080:8080"
     networks:
       - caas_networks
+    depends_on:
+      - postgres-caas
+      - lxc-manager 
 
 volumes:
   postgres_data:
@@ -130,4 +87,3 @@ networks:
   caas_networks:
     name: caas_networks
     driver: bridge
->>>>>>> develop
