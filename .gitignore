@@ -10,7 +10,10 @@ venv/
 
 # Docker
 *.log
+<<<<<<< HEAD
 Dockerfile
+=======
+>>>>>>> develop
 .dockerignore
 
 # IDEs and editors
@@ -19,3 +22,8 @@ Dockerfile
 # Other
 dist/
 build/
+<<<<<<< HEAD
+=======
+
+try.py
+>>>>>>> develop

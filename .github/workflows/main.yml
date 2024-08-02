@@ -1,0 +1,43 @@
+name: CD
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push LXC manager image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./Backend/lxc-manager
+        file: ./Backend/lxc-manager/Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/lxc-manager:latest
+    
+    - name: Build and push Nginx automation image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./Backend/deploy-automation
+        file: ./Backend/deploy-automation/Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/deploy-automation:latest
+
+    - name: Log out from Docker Hub
+      run: docker logout
