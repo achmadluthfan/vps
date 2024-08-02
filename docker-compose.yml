@@ -69,7 +69,7 @@ services:
       - lxc-manager
   
   fe-caas:
-    image: lutpann/fe-caas:1.4
+    image: lutpann/fe-caas:2.4
     container_name: fe-caas
     environment:
       DATABASE_URL: postgres-caas
